@@ -133,83 +133,106 @@ module.exports = async (message, bot, TOKEN) => {
     });
   } else if (firstWord === "/ban" && adminsList.includes(userId)) {
     try {
-      if (adminsList.includes(target)) {
-        await bot.sendMessage(
-            chatId,
-            "Nega adminni chatdan haydayman? Bu yaxshi fikrga o'xshamaydi.",
-            {
-              parse_mode: "HTML",
-              reply_to_message_id: messageId
-            }
-        );
-      } else {
-        let msg = await bot.getChatMember(chatId, target);
-        if (msg.status === "kicked") {
+      if (target) {
+
+        if (adminsList.includes(target)) {
           await bot.sendMessage(
               chatId,
-              `<a href="tg://user?id=${target}">${targetName}</a> guruhda mavjud emas.`,
+              "Nega adminni chatdan haydayman? Bu yaxshi fikrga o'xshamaydi.",
               {
                 parse_mode: "HTML",
                 reply_to_message_id: messageId
               }
           );
-          await bot.deleteMessage(chatId, messageId);
         } else {
-          let keyboard = {
-            inline_keyboard: [
-              [
+          let msg = await bot.getChatMember(chatId, target);
+          if (msg.status === "kicked") {
+            await bot.sendMessage(
+                chatId,
+                `<a href="tg://user?id=${target}">${targetName}</a> guruhda mavjud emas.`,
                 {
-                  text: "Bandan olish (admin)",
-                  callback_data: `unban#${chatId}#${target}`,
-                },
+                  parse_mode: "HTML",
+                  reply_to_message_id: messageId
+                }
+            );
+            await bot.deleteMessage(chatId, messageId);
+          } else {
+            let keyboard = {
+              inline_keyboard: [
+                [
+                  {
+                    text: "Bandan olish (admin)",
+                    callback_data: `unban#${chatId}#${target}`,
+                  },
+                ],
               ],
-            ],
-          };
-          await bot.kickChatMember(chatId, target);
-          await bot.sendMessage(
-              chatId,
-              nextWord !== "/ban"
-                  ? `<a href="tg://user?id=${target}">${targetName}</a> ni guruhdan chiqarib yubordim.
+            };
+            await bot.kickChatMember(chatId, target);
+            await bot.sendMessage(
+                chatId,
+                nextWord !== "/ban"
+                    ? `<a href="tg://user?id=${target}">${targetName}</a> ni guruhdan chiqarib yubordim.
 <b>Sabab:</b> ${nextWord}`
-                  : `<a href="tg://user?id=${target}">${targetName}</a> ni guruhdan chiqarib yubordim.`,
-              {
-                parse_mode: "HTML",
-                reply_markup: keyboard,
-                reply_to_message_id: messageId
-              }
-          );
-          await delWarn(chatId, target);
+                    : `<a href="tg://user?id=${target}">${targetName}</a> ni guruhdan chiqarib yubordim.`,
+                {
+                  parse_mode: "HTML",
+                  reply_markup: keyboard,
+                  reply_to_message_id: messageId
+                }
+            );
+            await delWarn(chatId, target);
+          }
         }
+      } else {
+        await bot.sendMessage(chatId, `Kimni nazarda tutayotganingizni bilmadim, kerakli foydalanuvchini belgilang!`, {
+          reply_to_message_id: messageId
+        })
       }
     } catch (e) {
       throw new Error(e);
     }
   } else if (firstWord === '/dban') {
-    let keyboard = {
-      inline_keyboard: [
-        [
+    if (adminsList.includes(target)) {
+      await bot.sendMessage(
+          chatId,
+          "Nega adminni chatdan haydayman? Bu yaxshi fikrga o'xshamaydi.",
           {
-            text: "Bandan olish (admin)",
-            callback_data: `unban#${chatId}#${target}`,
-          },
-        ],
-      ],
-    };
-    await bot.kickChatMember(chatId, target)
-    await bot.deleteMessage(chatId, targetMessage)
-    await bot.sendMessage(
-        chatId,
-        nextWord !== "/dban"
-            ? `<a href="tg://user?id=${target}">${targetName}</a> guruhdan chiqarib yuborildi va so'ngi yozgan xabari o'chirildi.
+            parse_mode: "HTML",
+            reply_to_message_id: messageId
+          }
+      );
+    } else {
+      if (target) {
+        let keyboard = {
+          inline_keyboard: [
+            [
+              {
+                text: "Bandan olish (admin)",
+                callback_data: `unban#${chatId}#${target}`,
+              },
+            ],
+          ],
+        };
+        await bot.kickChatMember(chatId, target)
+        await bot.deleteMessage(chatId, targetMessage)
+        await bot.sendMessage(
+            chatId,
+            nextWord !== "/dban"
+                ? `<a href="tg://user?id=${target}">${targetName}</a> guruhdan chiqarib yuborildi va so'ngi yozgan xabari o'chirildi.
 <b>Sabab:</b> ${nextWord}`
-            : `<a href="tg://user?id=${target}">${targetName}</a> guruhdan chiqarib yuborildi va so'ngi yozgan xabari o'chirildi.`,
-        {
-          parse_mode: "HTML",
-          reply_markup: keyboard,
+                : `<a href="tg://user?id=${target}">${targetName}</a> guruhdan chiqarib yuborildi va so'ngi yozgan xabari o'chirildi.`,
+            {
+              parse_mode: "HTML",
+              reply_markup: keyboard,
+              reply_to_message_id: messageId
+            }
+        );
+      } else {
+        await bot.sendMessage(chatId, "Kimni nazarda tutayotganingizni bilmadim, kerakli foydalanuvchini belgilang!", {
           reply_to_message_id: messageId
-        }
-    );
-
+        })
+      }
+    }
   } else if (firstWord === "/unban" && adminsList.includes(userId)) {
     if (target) {
       let member = await bot.getChatMember(chatId, target)
