@@ -241,6 +241,11 @@ Bu buyruqlar yordamida qoidabuzarlarni ogohlantirish va 6 ta ogohlantirishdan so
 - /dwarn: Reply qilingan foydalanuvchiga ogohlantirish berish va belgilangan xabarini o'chirish.
 
 - /dwarn <code>sabab</code>: Reply qilingan foydalanuvchiga ogohlantirish berish, belgilangan xabarini o'chirish va sababini yozish.
+
+- /setwarn <code>raqam</code>: Guruhda foydalanuvchilarga ogohlantirish berish soni. Odatda 4 ta bo'ladi.
+
+<i>Misol uchun:</i>
+<code>/setwarn 3</code> - <i>3 ta ogohlantirishdan so'ng foydalanuvchi guruhdan chiqarib yuboriladi.</i>
 `, {
             parse_mode: 'HTML',
             message_id: message.message.message_id,
@@ -258,9 +263,9 @@ Bu buyruqlar yordamida qoidabuzarlarni ogohlantirish va 6 ta ogohlantirishdan so
                 ],
             ],
         };
-        await bot.editMessageText(`<b>Ogohlantirishlar</b>
+        await bot.editMessageText(`<b>Sozlamalar</b>
 
-Guruh huquqlarini nazorat qilish. Buyruqlar adminlarga turli qo'shimcha imkoniyatlarni taqdim qiladi.
+Guruh sozlamalarini nazorat qilish. Buyruqlar adminlarga turli qo'shimcha imkoniyatlarni taqdim qiladi.
 
 - /link: Guruhda reklama va linklar tarqatishga ruhsat berish.
 
@@ -274,9 +279,12 @@ Guruh huquqlarini nazorat qilish. Buyruqlar adminlarga turli qo'shimcha imkoniya
 
 - /showjoined: Guruhga kirgan-chiqqanlar haqidagi xabarni yoqish.
 
+- /setwarn <code>raqam</code>: Guruhda foydalanuvchilarga ogohlantirish berish soni. Odatda 4 ta bo'ladi.
+
 - /mention: Guruhda kuchukcha (<code>@</code>) bilan yozilgan xabarlarga ruhsat berish.
 
 - /nomention: Guruhda kuchukcha (<code>@</code>) bilan yozilgan xabarlarni o'chirish.
+
 `, {
             parse_mode: 'HTML',
             message_id: message.message.message_id,
@@ -312,7 +320,7 @@ Guruh huquqlarini nazorat qilish. Buyruqlar adminlarga turli qo'shimcha imkoniya
                         callback_data: 'a5',
                     },
                     {
-                        text: "Huquqlar",
+                        text: "Sozlamalar",
                         callback_data: 'a6',
                     }
                 ],
@@ -351,8 +359,11 @@ Ko'proq ma'lumot - @BuQitmir`;
                 ? `☑️ Arabcha simvollarni o'chirish\n`
                 : `✖️ Arabcha simvollarni o'chirish\n`
             permissions += chat.allowMention
-                ? `☑️ @ bilan belgilashga ruhsat\n`
-                : `✖️ @ bilan belgilashga ruhsat\n`
+                ? `✖️ @ bilan belgilashga ruhsat\n`
+                : `☑️ @ bilan belgilashga ruhsat\n`
+            permissions += chat.warnCount
+                ? `❕ Ogohlantirish berishlar soni: ${chat.warnCount}`
+                : `❕ Ogohlantirish berishlar soni: ${chat.warnCount}`
 
         } else {
             permissions = `Siz admin emassiz!`

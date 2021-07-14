@@ -22,7 +22,8 @@ const {
   allowArabic,
   deleteArabic,
     allowMention,
-    disallowMention
+    disallowMention,
+    updateWarnModel
 } = require("./AllowDeleteParticipation");
 const { getBlock, removeBlock } = require("../modules/models/BlockModel");
 
@@ -418,6 +419,8 @@ module.exports = async (message, bot, TOKEN) => {
       !adminsList.includes(target)
   ) {
     try {
+      let chat = await getChat(chatId);
+      chat = chat?.dataValues;
       if (target) {
         let msg = await bot.getChatMember(chatId, target);
         if (msg.status !== 'kicked') {
@@ -429,7 +432,8 @@ module.exports = async (message, bot, TOKEN) => {
             sabab = `<b>Sabab:</b> ${nextWord}`
           }
           warn = await getWarn(chatId, target);
-          if (warn.dataValues.warn === 6) {
+
+          if (warn.dataValues.warn == chat.warnCount) {
             await bot.kickChatMember(chatId, target);
             await delWarn(chatId, target);
             let keyboard = {
@@ -444,7 +448,7 @@ module.exports = async (message, bot, TOKEN) => {
             };
             await bot.sendMessage(
                 chatId,
-                `<a href="tg://user?id=${target}">${targetName}</a> da ogohlantirishlar soni 6 taga yetgani uchun guruhdan chiqarib yubordim.`,
+                `<a href="tg://user?id=${target}">${targetName}</a> da ogohlantirishlar soni ${chat.warnCount} taga yetgani uchun guruhdan chiqarib yubordim.`,
                 {
                   parse_mode: "HTML",
                   reply_to_message_id: messageId,
@@ -465,7 +469,7 @@ module.exports = async (message, bot, TOKEN) => {
 
             await bot.sendMessage(
                 chatId,
-                `<a href="tg://user?id=${target}">${targetName}</a> da ogohlantirish mavjud, ehtiyot bo'ling. ${warn.dataValues.warn}/6\n\n${nextWord ? sabab : ''}`,
+                `<a href="tg://user?id=${target}">${targetName}</a> da ogohlantirish mavjud, ehtiyot bo'ling. ${warn.dataValues.warn}/${chat.warnCount}\n\n${nextWord ? sabab : ''}`,
                 {
                   parse_mode: "HTML",
                   reply_markup: keyboard,
@@ -492,6 +496,8 @@ module.exports = async (message, bot, TOKEN) => {
       !adminsList.includes(target)
   ) {
     try {
+      let chat = await getChat(chatId);
+      chat = chat?.dataValues;
       if (target) {
         let msg = await bot.getChatMember(chatId, target);
         if (msg.status !== 'kicked') {
@@ -504,12 +510,12 @@ module.exports = async (message, bot, TOKEN) => {
           }
           await bot.deleteMessage(chatId, message.reply_to_message.message_id)
           warn = await getWarn(chatId, target);
-          if (warn.dataValues.warn === 6) {
+          if (warn.dataValues.warn == chat.warnCount) {
             await bot.kickChatMember(chatId, target);
             await delWarn(chatId, target);
             await bot.sendMessage(
                 chatId,
-                `<a href="tg://user?id=${target}">${targetName}</a> da ogohlantirishlar soni 6 taga yetgani uchun guruhdan chiqarib yubordim.`,
+                `<a href="tg://user?id=${target}">${targetName}</a> da ogohlantirishlar soni ${chat.warnCount} taga yetgani uchun guruhdan chiqarib yubordim.`,
                 {
                   parse_mode: "HTML",
                   reply_to_message_id: messageId
@@ -529,7 +535,7 @@ module.exports = async (message, bot, TOKEN) => {
 
             await bot.sendMessage(
                 chatId,
-                `<a href="tg://user?id=${target}">${targetName}</a> da ogohlantirish mavjud, ehtiyot bo'ling. ${warn.dataValues.warn}/6\n\n${nextWord ? sabab : ''}`,
+                `<a href="tg://user?id=${target}">${targetName}</a> da ogohlantirish mavjud, ehtiyot bo'ling. ${warn.dataValues.warn}/${chat.warnCount}\n\n${nextWord ? sabab : ''}`,
                 {
                   parse_mode: "HTML",
                   reply_markup: keyboard,
@@ -615,6 +621,28 @@ module.exports = async (message, bot, TOKEN) => {
         reply_to_message_id: messageId
       })
     } catch (e) {
+    }
+  } else if (firstWord === "/setwarn") {
+    try {
+      if (Number(nextWord)) {
+        let num = Math.abs(Number(nextWord))
+        if (num < 2 || num > 20) {
+          await bot.sendMessage(chatId, "Ogohlantirishlar soni eng kami 2 ta, ko'pi bilan 20 ta bo'lishi mumkin. Qaytadan urining.", {
+            reply_to_message_id: messageId
+          })
+        } else {
+          await updateWarnModel(bot, message, num);
+          await bot.sendMessage(chatId, `Ogohlantirish berishlar soni ${num} tagacha oshirildi!`, {
+            reply_to_message_id: messageId
+          });
+        }
+      } else {
+        await bot.sendMessage(chatId, "Buyruqdan so'ng raqam kiriting!", {
+          reply_to_message_id: messageId
+        })
+      }
+    } catch (e) {
+
     }
   }
 };

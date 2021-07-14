@@ -34,6 +34,10 @@ async function ChatModel() {
     allowMention: {
       type: DataTypes.BOOLEAN,
       allowNull: false
+    },
+    warnCount: {
+      type: DataTypes.INTEGER,
+      allowNull: false
     }
   });
 
@@ -56,7 +60,8 @@ async function newChat(chat_id, chat_title) {
       allowGreeting: false,
       allowDeleteParticipation: true,
       allowDeleteArabic: false,
-      allowMention: false
+      allowMention: false,
+      warnCount: 4
     });
   }
   return chat;
@@ -227,6 +232,20 @@ async function banMention(chat_id) {
   return chat;
 }
 
+async function updateWarn(chat_id, msg) {
+  let model = await ChatModel();
+  let chat = await model.update(
+      { warnCount: msg },
+      {
+        where: {
+          chat_id,
+        },
+      }
+  );
+  return chat;
+}
+
+
 
 module.exports = {
   newChat,
@@ -242,5 +261,6 @@ module.exports = {
   banDeleteArabic,
   allowDeleteArabic,
   onMention,
-  banMention
+  banMention,
+  updateWarn
 };

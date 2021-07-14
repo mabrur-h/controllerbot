@@ -1,5 +1,6 @@
 const { DataTypes, Op } = require("sequelize");
 const postgres = require("../postgres");
+const {getChat} = require("./ChatModel");
 
 async function WarnModel() {
   let warn = postgres.define("warn", {
@@ -41,7 +42,7 @@ async function newWarn(user_id, chat_id) {
     });
   } else {
     warn = warn.dataValues;
-    if (warn.warn < 6) {
+    if (warn.warn < 21) {
       return await model.update(
         { warn: warn.warn + 1 },
         {

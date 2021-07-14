@@ -4,7 +4,8 @@ const {
   allowDeleteArabic,
   banDeleteArabic,
     onMention,
-    banMention
+    banMention,
+    updateWarn
 } = require("../modules/models/ChatModel");
 
 async function hideParticipation(bot, message) {
@@ -49,5 +50,13 @@ async function disallowMention(bot, message) {
   }
 }
 
+async function updateWarnModel(bot, message, text) {
+  try {
+    await updateWarn(message.chat.id, text)
+  } catch (e) {
 
-module.exports = { showParticipation, hideParticipation, allowArabic, deleteArabic, allowMention, disallowMention };
+  }
+}
+
+
+module.exports = { showParticipation, hideParticipation, allowArabic, deleteArabic, allowMention, disallowMention, updateWarnModel };
