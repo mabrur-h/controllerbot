@@ -198,12 +198,12 @@ bloklash vaqti 30 soniyadan ko'p bo'lishi kerak.
         };
         await bot.editMessageText(`<b>Ta'qiqlar</b>
 
-Guruhda so'kinadiganlar, joiz bo'lmagan so'zlarni ishlatadiganlarga qarshi mahsus himoya. U yordamida ta'qiqlangan so'zlar ro'yhatini hosil qilib, ishlatganlarga 3 daqiqagacha yoza olmaydigan qilib qo'yishingiz mumkin.
+Guruhda so'kinadiganlar, joiz bo'lmagan so'zlarni ishlatadiganlarga qarshi mahsus himoya. U yordamida ta'qiqlangan so'zlar ro'yhatini hosil qilib, ishlatganlarga 5 daqiqagacha yoza olmaydigan qilib qo'yishingiz mumkin.
 
 - /addblocklist <code>so'z</code>: Buyruqdan so'ng yozilgan so'zni ta'qiqlangan so'zlar ro'yhatiga qo'shib qo'yish.
 
 <i>Misol uchun: </i>
-<code>/addblocklist qimor</code> - <i>qimor so'zi qatnashgan gap o'chirib tashlanadi.</i>
+<code>/addblocklist qimor</code> - <i>qimor so'zi qatnashgan gap o'chirib tashlanadi va foydalanuvchi 5 daqiqa yoza olmaydi.</i>
 
 - /unblocklist <code>so'z</code>: Buyruqdan so'ng yozilgan so'zni ta'qiqlangan so'zlar ro'yhatidan olib tashlash.
 
@@ -359,8 +359,8 @@ Ko'proq ma'lumot - @BuQitmir`;
                 ? `☑️ Arabcha simvollarni o'chirish\n`
                 : `✖️ Arabcha simvollarni o'chirish\n`
             permissions += chat.allowMention
-                ? `✖️ @ bilan belgilashga ruhsat\n`
-                : `☑️ @ bilan belgilashga ruhsat\n`
+                ? `☑️ @ bilan belgilashga ruhsat\n`
+                : `✖️ @ bilan belgilashga ruhsat\n`
             permissions += chat.warnCount
                 ? `❕ Ogohlantirish berishlar soni: ${chat.warnCount}`
                 : `❕ Ogohlantirish berishlar soni: ${chat.warnCount}`

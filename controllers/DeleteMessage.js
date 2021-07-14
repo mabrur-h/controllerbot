@@ -42,8 +42,8 @@ module.exports = async (message, bot, TOKEN) => {
     if (filteredWords) {
       let flag = checkFilter(text, filteredWords.dataValues.filter);
       if (flag && !adminsList.includes(user.id)) {
-        let time = Math.round((Date.now() + ms("3m")) / 1000);
-        let date = moment(Date.now() + ms("3m"))
+        let time = Math.round((Date.now() + ms("5m")) / 1000);
+        let date = moment(Date.now() + ms("5m"))
           .locale("uz-latn")
           .format("HH:mm");
         axios
@@ -58,7 +58,7 @@ module.exports = async (message, bot, TOKEN) => {
           .then(function () {
             bot.sendMessage(
               chatId,
-              `<a href="tg://user?id=${user.id}">${user.first_name}</a> ta'qiqlangan so'z ishlatgani uchun, 3 daqiqa xabar yoza olmaydi!`,
+              `<a href="tg://user?id=${user.id}">${user.first_name}</a> ta'qiqlangan so'z ishlatgani uchun, 5 daqiqa xabar yoza olmaydi!`,
               {
                 parse_mode: "HTML",
               }
