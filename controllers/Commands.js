@@ -79,7 +79,7 @@ module.exports = async (message, bot, TOKEN) => {
 
   let chat;
 
-  if (text === `/start`) {
+  if (text === `/start` || text === `/start@${BOT_USERNAME}`) {
     if (isAdmin) {
       try {
         await bot.sendChatAction(chatId, "typing")
@@ -89,7 +89,8 @@ module.exports = async (message, bot, TOKEN) => {
         }
         chat = await newChat(chatId, message.chat.title);
         await bot.sendMessage(chatId, `Salom :) Savollar bo'lsa lichkaga o'ting, javob beraman😎`, {
-          parse_mode: "HTML"
+          parse_mode: "HTML",
+          reply_to_message_id: messageId
         })
       } catch (e) {
         throw new Error(e);
@@ -126,7 +127,8 @@ module.exports = async (message, bot, TOKEN) => {
     let permissions = `Botning guruhdagi sozlamalarini ko'rish uchun pastdagi tugmachani bosing.`
     await bot.sendMessage(chatId, permissions, {
       parse_mode: "HTML",
-      reply_markup: keyboard
+      reply_markup: keyboard,
+      reply_to_message_id: messageId
     });
   } else if (firstWord === "/ban" && adminsList.includes(userId)) {
     try {
@@ -147,6 +149,7 @@ module.exports = async (message, bot, TOKEN) => {
               `<a href="tg://user?id=${target}">${targetName}</a> guruhda mavjud emas.`,
               {
                 parse_mode: "HTML",
+                reply_to_message_id: messageId
               }
           );
           await bot.deleteMessage(chatId, messageId);
@@ -171,6 +174,7 @@ module.exports = async (message, bot, TOKEN) => {
               {
                 parse_mode: "HTML",
                 reply_markup: keyboard,
+                reply_to_message_id: messageId
               }
           );
           await delWarn(chatId, target);
@@ -201,6 +205,7 @@ module.exports = async (message, bot, TOKEN) => {
         {
           parse_mode: "HTML",
           reply_markup: keyboard,
+          reply_to_message_id: messageId
         }
     );
 
@@ -387,7 +392,9 @@ module.exports = async (message, bot, TOKEN) => {
       const filteredWords = await getFilter(chatId);
 
       if (!filteredWords) {
-        await bot.sendMessage(chatId, `Ta'qiqlangan so'z to'pilmadi!`);
+        await bot.sendMessage(chatId, `Ta'qiqlangan so'z to'pilmadi!`, {
+          reply_to_message_id: messageId
+        });
         return 0;
       }
 
@@ -412,46 +419,64 @@ module.exports = async (message, bot, TOKEN) => {
   ) {
     try {
       if (target) {
-
-        let warn = await newWarn(target, chatId);
-        let sabab;
-        if (nextWord === '/warn') {
-          sabab = '';
-        } else {
-          sabab = `<b>Sabab:</b> ${nextWord}`
-        }
-        warn = await getWarn(chatId, target);
-        if (warn.dataValues.warn === 6) {
-          await bot.kickChatMember(chatId, target);
-          await delWarn(chatId, target);
-          await bot.sendMessage(
-              chatId,
-              `<a href="tg://user?id=${target}">${targetName}</a> da ogohlantirishlar soni 6 taga yetgani uchun guruhdan chiqarib yubordim.`,
-              {
-                parse_mode: "HTML",
-                reply_to_message_id: messageId
-              }
-          );
-        } else {
-          let keyboard = {
-            inline_keyboard: [
-              [
-                {
-                  text: "Ogohlantirishni olish (faqat admin)",
-                  callback_data: `unwarn#${chatId}#${target}`,
-                },
+        let msg = await bot.getChatMember(chatId, target);
+        if (msg.status !== 'kicked') {
+          let warn = await newWarn(target, chatId);
+          let sabab;
+          if (nextWord === '/warn') {
+            sabab = '';
+          } else {
+            sabab = `<b>Sabab:</b> ${nextWord}`
+          }
+          warn = await getWarn(chatId, target);
+          if (warn.dataValues.warn === 6) {
+            await bot.kickChatMember(chatId, target);
+            await delWarn(chatId, target);
+            let keyboard = {
+              inline_keyboard: [
+                [
+                  {
+                    text: "Bandan olish (admin)",
+                    callback_data: `unban#${chatId}#${target}`,
+                  },
+                ],
               ],
-            ],
-          };
+            };
+            await bot.sendMessage(
+                chatId,
+                `<a href="tg://user?id=${target}">${targetName}</a> da ogohlantirishlar soni 6 taga yetgani uchun guruhdan chiqarib yubordim.`,
+                {
+                  parse_mode: "HTML",
+                  reply_to_message_id: messageId,
+                  reply_markup: keyboard
+                }
+            );
+          } else {
+            let keyboard = {
+              inline_keyboard: [
+                [
+                  {
+                    text: "Ogohlantirishni olish (faqat admin)",
+                    callback_data: `unwarn#${chatId}#${target}`,
+                  },
+                ],
+              ],
+            };
 
-          await bot.sendMessage(
-              chatId,
-              `<a href="tg://user?id=${target}">${targetName}</a> da ogohlantirish mavjud, ehtiyot bo'ling. ${warn.dataValues.warn}/6\n\n${nextWord ? sabab : ''}`,
-              {
-                parse_mode: "HTML",
-                reply_markup: keyboard,
-              }
-          );
+            await bot.sendMessage(
+                chatId,
+                `<a href="tg://user?id=${target}">${targetName}</a> da ogohlantirish mavjud, ehtiyot bo'ling. ${warn.dataValues.warn}/6\n\n${nextWord ? sabab : ''}`,
+                {
+                  parse_mode: "HTML",
+                  reply_markup: keyboard,
+                  reply_to_message_id: messageId
+                }
+            );
+          }
+        } else {
+          await bot.sendMessage(chatId, `Foydalanuvchi guruhda mavjud emas!`, {
+            reply_to_message_id: messageId
+          })
         }
       } else {
         await bot.sendMessage(chatId, `Kimni nazarda tutayotganingizni bilmadim, kerakli foydalanuvchini belgilang!`, {
@@ -468,46 +493,54 @@ module.exports = async (message, bot, TOKEN) => {
   ) {
     try {
       if (target) {
-
-        let warn = await newWarn(target, chatId);
-        let sabab;
-        if (nextWord === '/dwarn') {
-          sabab = '';
-        } else {
-          sabab = `<b>Sabab:</b> ${nextWord}`
-        }
-        await bot.deleteMessage(chatId, message.reply_to_message.message_id)
-        warn = await getWarn(chatId, target);
-        if (warn.dataValues.warn === 6) {
-          await bot.kickChatMember(chatId, target);
-          await delWarn(chatId, target);
-          await bot.sendMessage(
-              chatId,
-              `<a href="tg://user?id=${target}">${targetName}</a> da ogohlantirishlar soni 6 taga yetgani uchun guruhdan chiqarib yubordim.`,
-              {
-                parse_mode: "HTML",
-              }
-          );
-        } else {
-          let keyboard = {
-            inline_keyboard: [
-              [
+        let msg = await bot.getChatMember(chatId, target);
+        if (msg.status !== 'kicked') {
+          let warn = await newWarn(target, chatId);
+          let sabab;
+          if (nextWord === '/dwarn') {
+            sabab = '';
+          } else {
+            sabab = `<b>Sabab:</b> ${nextWord}`
+          }
+          await bot.deleteMessage(chatId, message.reply_to_message.message_id)
+          warn = await getWarn(chatId, target);
+          if (warn.dataValues.warn === 6) {
+            await bot.kickChatMember(chatId, target);
+            await delWarn(chatId, target);
+            await bot.sendMessage(
+                chatId,
+                `<a href="tg://user?id=${target}">${targetName}</a> da ogohlantirishlar soni 6 taga yetgani uchun guruhdan chiqarib yubordim.`,
                 {
-                  text: "Ogohlantirishni olish (admin)",
-                  callback_data: `unwarn#${chatId}#${target}`,
-                },
+                  parse_mode: "HTML",
+                  reply_to_message_id: messageId
+                }
+            );
+          } else {
+            let keyboard = {
+              inline_keyboard: [
+                [
+                  {
+                    text: "Ogohlantirishni olish (admin)",
+                    callback_data: `unwarn#${chatId}#${target}`,
+                  },
+                ],
               ],
-            ],
-          };
+            };
 
-          await bot.sendMessage(
-              chatId,
-              `<a href="tg://user?id=${target}">${targetName}</a> da ogohlantirish mavjud, ehtiyot bo'ling. ${warn.dataValues.warn}/6\n\n${nextWord ? sabab : ''}`,
-              {
-                parse_mode: "HTML",
-                reply_markup: keyboard,
-              }
-          );
+            await bot.sendMessage(
+                chatId,
+                `<a href="tg://user?id=${target}">${targetName}</a> da ogohlantirish mavjud, ehtiyot bo'ling. ${warn.dataValues.warn}/6\n\n${nextWord ? sabab : ''}`,
+                {
+                  parse_mode: "HTML",
+                  reply_markup: keyboard,
+                  reply_to_message_id: messageId
+                }
+            );
+          }
+        } else {
+          await bot.sendMessage(chatId, `Foydalanuvchi guruhdan topilmadi!`, {
+            reply_to_message_id: messageId
+          })
         }
       }
     } catch (e) {
@@ -532,13 +565,17 @@ module.exports = async (message, bot, TOKEN) => {
   } else if (firstWord === "/noarabic" && adminsList.includes(userId)) {
     try {
       await deleteArabic(bot, message);
-      await bot.sendMessage(chatId, `Guruhdan arabcha simvollarni o'chirishni boshlayman.`)
+      await bot.sendMessage(chatId, `Guruhdan arabcha simvollarni o'chirishni boshlayman.`, {
+        reply_to_message_id: messageId
+      })
     } catch (e) {
     }
   } else if (firstWord === "/allowarabic" && adminsList.includes(userId)) {
     try {
       await allowArabic(bot, message);
-      await bot.sendMessage(chatId, `Guruhda arabcha simvollar ishlatish mumkin.`)
+      await bot.sendMessage(chatId, `Guruhda arabcha simvollar ishlatish mumkin.`, {
+        reply_to_message_id: messageId
+      })
     } catch (e) {
     }
   } else if (firstWord === "/mention" && adminsList.includes(userId)) {
