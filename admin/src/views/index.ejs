@@ -1,0 +1,199 @@
+<%- include("parts/header") %> <% var bot_username, sentMessage, groupsCount,
+usersCount, blocksCount, hasError, isFinished, groups %>
+<section
+  class="w-100 d-flex flex-column align-items-center justify-content-center"
+>
+  <div class="container d-flex flex-column">
+    <h2 class="my-4 text-center">Group Controller Admin Panel</h2>
+    <div class="row">
+      <div class="col-12 col-md-3">
+        <h6 class="border border-primary p-3 text-center">
+          Guruhlar: <%= groupsCount%>
+        </h6>
+      </div>
+      <div class="col-12 col-md-3">
+        <h6 class="border border-primary p-3 text-center">
+          Foydalanuvchilar: <%= usersCount%>
+        </h6>
+      </div>
+      <div class="col-12 col-md-3">
+        <h6 class="border border-success p-3 text-center">
+          Yuborilgan: <%= sentMessage ? sentMessage : 0%>
+        </h6>
+      </div>
+      <div class="col-12 col-md-3">
+        <h6 class="border border-danger p-3 text-center">
+          Bloklaganlar: <%= blocksCount%>
+        </h6>
+      </div>
+    </div>
+    <div class="row my-2">
+      <div class="col-12 col-md-3">
+        <h4 class="my-2 text-center">@<%= bot_username%></h4>
+        <div class="card p-2">
+          <button class="btn btn-danger my-1" id="clearForm">Tozalash</button>
+          <a href="/" class="btn btn-primary my-1">Yangilash</a>
+          <button
+            class="btn btn-outline-secondary my-1"
+            id="getGroups"
+            data-bs-toggle="modal"
+            data-bs-target="#groupsModal"
+          >
+            Guruhlar
+          </button>
+        </div>
+      </div>
+      <div class="col-12 col-md-8">
+        <h4 class="my-2 text-center">Xabar yuborish</h4>
+        <form action="/" id="messageForm" method="POST" class="w-100">
+          <select
+            class="mb-2 w-100 form-select"
+            name="message_type"
+            id="selectType"
+          >
+            <option value="text">Matnli</option>
+            <option value="image">Rasmli</option>
+            <option value="audio">Audioli</option>
+            <option value="video">Videoli</option>
+          </select>
+          <input
+            type="text"
+            name="media_src"
+            placeholder="Media manzili"
+            disabled
+            class="w-100 form-control mb-2"
+            id="mediaInput"
+          />
+          <textarea
+            name="message_text"
+            id="messageText"
+            cols="30"
+            rows="10"
+            placeholder="Xabar matni"
+            class="mb-2 w-100 form-control"
+          ></textarea>
+          <input
+                  type="text"
+                  name="keyboard_text"
+                  placeholder="Keyboard matni"
+                  class="w-100 form-control mb-2"
+                  id="keyboardInput"
+          />
+          <input
+                  type="text"
+                  name="keyboard_src"
+                  placeholder="Keyboard manzili"
+                  class="w-100 form-control mb-2"
+                  id="keyboardInput"
+          />
+          <div class="btn-group w-100">
+            <button
+              type="button"
+              id="testBtn"
+              class="btn btn-warning btn-lg w-50"
+              data-bs-toggle="modal"
+              data-bs-target="#exampleModal"
+            >
+              Test qilish
+            </button>
+            <button class="btn btn-primary btn-lg w-50" type="submit">
+              Yuborish
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Modal -->
+<div
+  class="modal fade"
+  id="exampleModal"
+  tabindex="-1"
+  aria-labelledby="exampleModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Oldindan ko'rinish</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <div class="card" style="width: 18rem">
+          <img
+            src="https://picsum.photos/200"
+            id="previewImage"
+            class="card-img-top"
+            alt="..."
+          />
+          <div class="card-body">
+            <p class="card-text" id="previewText"></p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Ok
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div
+  class="modal fade"
+  id="groupsModal"
+  tabindex="-1"
+  aria-labelledby="groupsModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="groupsModalLabel">Guruhlar ro'yxati</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <ol class="list-group list-group-numbered">
+          <% for(group of groups) { %>
+          <li
+            class="
+              list-group-item
+              d-flex
+              justify-content-between
+              align-items-start
+            "
+          >
+            <div class="ms-2 me-auto">
+              <div class="fw-bold"><%= group.name %></div>
+            </div>
+            <span class="badge bg-primary rounded-pill"
+              ><%=group.count  %></span>
+          </li>
+          <% } %>
+        </ol>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Ok
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/main.js"></script>
+<%- include("parts/footer") %>
